@@ -122,7 +122,7 @@ onMounted(fetchCategorias)
     </div>
 
     <!-- ⚡ Alert Dialog -->
-    <AlertDialog v-model:open="openDialog">
+    <AlertDialog v-model:open="openDialog" v-if="openDialog">
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>¿Eliminar categoría?</AlertDialogTitle>
