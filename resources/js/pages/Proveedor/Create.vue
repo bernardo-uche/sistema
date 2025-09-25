@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// Página para crear un nuevo Proveedor.
+// Usa un formulario reactivo simple y envía datos al backend con Inertia router.post.
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from "vue";
@@ -24,6 +26,7 @@ const resetForm = () => {
 };
 
 const submit = () => {
+    // Envía POST a resource('proveedor') -> proveedor.store
     router.post('/proveedor', form.value, { onSuccess: resetForm });
 };
 </script>

@@ -1,7 +1,9 @@
 <script setup lang="ts">
+// Listado de Productos con acciones de editar y eliminar.
+// Recibe props desde Laravel con Inertia y muestra la tabla con datos formateados.
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, usePage, Link, router } from '@inertiajs/vue3';
-import { Producto, type BreadcrumbItem, type SharedData} from '@/types';
+import { Producto, type BreadcrumbItem, type AppPageProps} from '@/types';
 import {
   Table,
   TableBody,
@@ -27,15 +29,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
-interface ProductoPageProps extends SharedData {
-  producto: (Producto & { categoria?: { nombre: string } })[]; 
-  // 👆 Incluí la relación para mostrar el nombre de la categoría
-}
-
+// Tipamos las props con AppPageProps para incluir ziggy/auth/sidebarOpen y la data de producto.
+type ProductoPageProps = AppPageProps<{ producto: (Producto & { categoria?: { nombre: string } })[] }>;
 const {props} = usePage<ProductoPageProps>();
 const producto = computed(() => props.producto)
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Producto', href: '/producto' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Producto', href: '/productos' }];
 
 // ⚡ Estado del dialog
 const openDialog = ref(false)
@@ -47,7 +46,7 @@ const confirmDelete = (id:number)=>{
   openDialog.value = true
 }
 
-// Método para eliminar producto
+// Método para eliminar producto (confirma y luego envía DELETE al backend)
 const deleteProducto = async()=>{
   if (!selectedId.value) return;
 
@@ -73,13 +72,13 @@ const deleteProducto = async()=>{
       <!-- Botón Crear -->
       <div class="flex gap-x-10">
   <Button as-child size="sm" class="bg-indigo-500 text-white hover:bg-indigo-700">
-    <Link href="productos/create">
+    <Link href="/productos/create">
       <CirclePlus /> Crear
     </Link>
   </Button>
 
   <Button as-child size="sm" class="bg-indigo-500 text-white hover:bg-indigo-700">
-    <Link href="categoria/index">
+    <Link href="/categoria">
       <CirclePlus /> Categoria
     </Link>
   </Button>
@@ -125,7 +124,7 @@ const deleteProducto = async()=>{
     <TableCell>{{ producto.estado }}</TableCell>
     <TableCell class="flex justify-center gap-2">
       <Button as-child size="sm" class="bg-blue-500 text-white hover:bg-blue-700">
-        <Link :href="`/producto/${producto.id}/edit`">
+        <Link :href="`/productos/${producto.id}/edit`">
           <Pencil />
           </Link>
       </Button>

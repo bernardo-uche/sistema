@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// Página de creación de Cliente.
+// Usa un formulario reactivo simple y envía los datos al backend con Inertia router.post.
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from "vue";
@@ -24,6 +26,8 @@ const resetForm = () => {
 };
 
 const submit = () => {
+    // Envia un POST a la ruta resource('cliente') -> cliente.store
+    // onSuccess limpia el formulario después de guardar correctamente.
     router.post('/cliente', form.value, { onSuccess: resetForm });
 };
 </script>

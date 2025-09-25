@@ -1,4 +1,8 @@
 <script setup lang="ts">
+// Página pública de bienvenida. No requiere autenticación.
+// Usa componentes de Inertia:
+// - Head: para inyectar elementos en <head> (título, links, etc.)
+// - Link: para navegación SPA entre rutas Inertia.
 import { Head, Link } from '@inertiajs/vue3';
 
 
@@ -6,6 +10,7 @@ import { Head, Link } from '@inertiajs/vue3';
 </script>
 
 <template>
+  <!-- Head permite definir meta/links/título para esta página -->
   <Head title="Welcome">
     <link rel="preconnect" href="https://rsms.me/" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
@@ -16,6 +21,7 @@ import { Head, Link } from '@inertiajs/vue3';
     <!-- 🔹 NAVBAR -->
     <header class="mb-6 w-full max-w-[335px] text-sm not-has-[nav]:hidden lg:max-w-4xl">
       <nav class="flex items-center justify-end gap-4">
+        <!-- Ziggy habilita la función global route('dashboard') para rutas con nombre -->
         <Link
           v-if="$page.props.auth.user"
           :href="route('dashboard')"

@@ -1,24 +1,37 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { Head, router, usePage } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import type { AppPageProps, BreadcrumbItem } from '@/types'
 
 // Props que vendrán desde Laravel (proveedores y productos)
-const { props } = usePage<{
+type CreatePageProps = AppPageProps<{
   proveedores: { id: number; nombre: string }[]
   productos: { id: number; nombre: string; precio_unitario: number }[]
-}>()
+}>
+const { props } = usePage<CreatePageProps>()
+
+// Migas de pan
+const breadcrumbs: BreadcrumbItem[] = [
+  { title: 'Compras', href: '/compras' },
+  { title: 'Crear', href: '#' },
+]
 
 // Estado del formulario
 const proveedorId = ref<number|null>(null)
-const detalles = ref<{ productoId: number|null; cantidad: number; precio: number }[]>([
-  { productoId: null, cantidad: 1, precio: 0 }
+const fecha = ref<string>('')
+// Inicializar fecha con hoy (YYYY-MM-DD)
+fecha.value = new Date().toISOString().slice(0, 10)
+const detalles = ref<{ producto_id: number|null; cantidad: number; precio_unitario: number }[]>([
+  { producto_id: null, cantidad: 1, precio_unitario: 0 }
 ])
 
 // Función para agregar fila de producto
 const addDetalle = () => {
-  detalles.value.push({ productoId: null, cantidad: 1, precio: 0 })
+  detalles.value.push({ producto_id: null, cantidad: 1, precio_unitario: 0 })
 }
 
 // Función para eliminar fila de producto
@@ -29,8 +42,8 @@ const removeDetalle = (index:number) => {
 // Calcular total
 const total = computed(()=>{
   return detalles.value.reduce((acc, d)=>{
-    if (d.productoId && d.cantidad > 0) {
-      return acc + (d.cantidad * d.precio)
+    if (d.producto_id && d.cantidad > 0) {
+      return acc + (d.cantidad * d.precio_unitario)
     }
     return acc
   },0)
@@ -40,7 +53,8 @@ const total = computed(()=>{
 const submitCompra = () => {
   router.post('/compras', {
     proveedor_id: proveedorId.value,
-    detalles: detalles.value
+    fecha: fecha.value,
+    detalles: detalles.value,
   },{
     onSuccess:()=>{ 
       alert('✅ Compra registrada y stock actualizado') 
@@ -52,19 +66,25 @@ const submitCompra = () => {
 
 <template>
   <Head title="Registrar Compra" />
-  <AppLayout>
+  <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex flex-col gap-4 rounded-xl p-6 border border-gray-300">
       <h2 class="text-2xl font-semibold mb-4">Registrar Compra</h2>
 
       <!-- Selección Proveedor -->
-      <div class="mb-4">
-        <label class="block mb-2 font-medium">Proveedor</label>
-        <select v-model="proveedorId" class="w-full border rounded p-2">
-          <option disabled value="">Seleccione un proveedor</option>
-          <option v-for="prov in props.proveedores" :key="prov.id" :value="prov.id">
-            {{ prov.nombre }}
-          </option>
-        </select>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label for="proveedor_id">Proveedor</Label>
+          <select id="proveedor_id" v-model="proveedorId" class="w-full border rounded p-2">
+            <option disabled value="">Seleccione un proveedor</option>
+            <option v-for="prov in props.proveedores" :key="prov.id" :value="prov.id">
+              {{ prov.nombre }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <Label for="fecha">Fecha</Label>
+          <Input id="fecha" type="date" v-model="fecha" />
+        </div>
       </div>
 
       <!-- Tabla Detalle -->
@@ -74,7 +94,7 @@ const submitCompra = () => {
             <tr>
               <th class="border p-2">Producto</th>
               <th class="border p-2">Cantidad</th>
-              <th class="border p-2">Precio</th>
+              <th class="border p-2">Precio Unitario</th>
               <th class="border p-2">Subtotal</th>
               <th class="border p-2">Acciones</th>
             </tr>
@@ -83,7 +103,7 @@ const submitCompra = () => {
             <tr v-for="(detalle,index) in detalles" :key="index">
               <!-- Producto -->
               <td class="border p-2">
-                <select v-model="detalle.productoId" class="w-full border rounded p-1">
+                <select v-model="detalle.producto_id" class="w-full border rounded p-1">
                   <option disabled value="">Seleccione</option>
                   <option v-for="prod in props.productos" :key="prod.id" :value="prod.id">
                     {{ prod.nombre }}
@@ -93,17 +113,17 @@ const submitCompra = () => {
 
               <!-- Cantidad -->
               <td class="border p-2">
-                <input type="number" v-model.number="detalle.cantidad" min="1" class="w-20 border rounded p-1" />
+                <Input type="number" v-model.number="detalle.cantidad" min="1" class="w-20" />
               </td>
 
-              <!-- Precio -->
+              <!-- Precio Unitario -->
               <td class="border p-2">
-                <input type="number" v-model.number="detalle.precio" step="0.01" class="w-28 border rounded p-1" />
+                <Input type="number" v-model.number="detalle.precio_unitario" step="0.01" class="w-28" />
               </td>
 
               <!-- Subtotal -->
               <td class="border p-2 text-right">
-                {{ (detalle.cantidad * detalle.precio).toFixed(2) }}
+                {{ (detalle.cantidad * detalle.precio_unitario).toFixed(2) }}
               </td>
 
               <!-- Acciones -->
@@ -125,7 +145,7 @@ const submitCompra = () => {
 
       <!-- Total -->
       <div class="text-right text-lg font-bold">
-        Total: {{ total.toFixed(2) }} Bs.
+        Total: {{ new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB' }).format(total) }}
       </div>
 
       <!-- Botón Guardar -->

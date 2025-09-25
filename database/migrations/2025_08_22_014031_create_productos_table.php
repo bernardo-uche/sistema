@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('costo_unitario', 10, 2);
             $table->date('fecha_vencimiento')->nullable();
             $table->foreignId('categoria_id')->nullable()->constrained('categorias')->onDelete('set null');
-            $table->foreignId('proveedor_id')->nullable()->constrained('proveedors')->onDelete('set null');
+            $table->foreignId('proveedor_id')->nullable()->constrained('proveedor')->onDelete('set null');
             $table->string('estado', 10)->default('activo'); // enum sustituido por string
             $table->timestamps();
         });

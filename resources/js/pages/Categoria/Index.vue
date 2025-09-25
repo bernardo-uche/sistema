@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import AppHeaderLayout from '@/layouts/app/AppHeaderLayout.vue';
-import { Head, usePage, Link, router } from '@inertiajs/vue3';
-import { Cliente, type BreadcrumbItem, type SharedData} from '@/types';
+import { Head, Link } from '@inertiajs/vue3';
+import type { BreadcrumbItem } from '@/types';
 import {
   Table,
   TableBody,
@@ -14,98 +13,104 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash, CirclePlus } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import axios from 'axios';
 
-// 🟢 importamos AlertDialog de shadcn-vue
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+// Estado
+type Categoria = { id: number; nombre: string }
+const categorias = ref<Categoria[]>([])
+const loading = ref<boolean>(false)
+const errorMsg = ref<string | null>(null)
 
-interface ClientePageProps extends SharedData{
-    cliente: Cliente[];
-}
+const breadcrumbs: BreadcrumbItem[]= [{title: 'Categorías', href: '/categoria'}];
 
-const {props} = usePage<ClientePageProps>();
-const cliente = computed(()=>props.cliente)
-
-const breadcrumbs: BreadcrumbItem[]= [{title: 'Cliente', href: '/cliente'}];
-
-// ⚡ Estado del dialog
+// Dialogo de confirmación
 const openDialog = ref(false)
 const selectedId = ref<number|null>(null)
 
-// Método para abrir el dialog
 const confirmDelete = (id:number)=>{
   selectedId.value = id
   openDialog.value = true
 }
 
-// Método para eliminar cliente
-const deleteCliente = async()=>{
-  if (!selectedId.value) return;
+const fetchCategorias = async () => {
+  try {
+    loading.value = true
+    errorMsg.value = null
+    const { data } = await axios.get('/api/categoria', { params: { paginar: 0 } })
+    // data esperado: { success, data, message }
+    categorias.value = Array.isArray(data?.data) ? data.data : []
+  } catch (e: any) {
+    errorMsg.value = e?.response?.data?.message || 'Error al cargar categorías'
+    categorias.value = []
+  } finally {
+    loading.value = false
+  }
+}
 
-  router.delete(`/cliente/${selectedId.value}`,{
-    preserveScroll:true,
-    onSuccess:() => {
-      router.visit('/cliente', {replace:true});
-      openDialog.value = false
-      selectedId.value = null
-    },
-    onError:(errors)=>{
-      console.error('Error deleting cliente:',errors);
-    }
-  });
-};
+const deleteCategoria = async () => {
+  if (!selectedId.value) return
+  try {
+    await axios.delete(`/api/categoria/${selectedId.value}`)
+    openDialog.value = false
+    const removedId = selectedId.value
+    selectedId.value = null
+    // Refrescar lista localmente para evitar otra carga completa
+    categorias.value = categorias.value.filter(c => c.id !== removedId)
+  } catch (e) {
+    console.error('Error eliminando categoría', e)
+  }
+}
+
+onMounted(fetchCategorias)
 </script>
 
 <template>
-  <Head title="Cliente" />
+  <Head title="Categorías" />
   <AppLayout :breadcrumbs="breadcrumbs">
 
     <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
       
       <div class="flex">
         <Button as-child size="sm" class="bg-indigo-500 text-white hover:bg-indigo-700">
-          <Link href="cliente/create">
-            <CirclePlus /> Create
+          <Link href="/categoria/create">
+            <CirclePlus /> Crear
           </Link>
         </Button>
       </div>
 
       <div class="relative min-h-[100vh] flex-1 rounded-xl border border-gray-300 dark:border-sidebar-border md:min-h-min">
         <Table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <TableCaption>CLIENTES</TableCaption>
+          <TableCaption>CATEGORÍAS</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
-              <TableHead>Telefono</TableHead>
-              <TableHead>Direcion</TableHead>
-              <TableHead class="text-center">Action</TableHead>
+              <TableHead class="text-center">Acciones</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
-            <TableRow v-for="cliente in cliente" :key="cliente.id">
-              <TableCell class="font-medium">{{ cliente.nombre }}</TableCell>
-              <TableCell>{{ cliente.telefono ?? 'N/A' }}</TableCell>
-              <TableCell>{{ cliente.direccion }}</TableCell>
+            <TableRow v-if="loading">
+              <TableCell colspan="2">Cargando...</TableCell>
+            </TableRow>
+            <TableRow v-else-if="errorMsg">
+              <TableCell colspan="2" class="text-red-600">{{ errorMsg }}</TableCell>
+            </TableRow>
+            <TableRow v-else-if="categorias.length === 0">
+              <TableCell colspan="2">Sin categorías</TableCell>
+            </TableRow>
+            <TableRow v-else v-for="categoria in categorias" :key="categoria.id">
+              <TableCell class="font-medium">{{ categoria.nombre }}</TableCell>
               <TableCell class="flex justify-center gap-2">
                 <Button as-child size="sm" class="bg-blue-500 text-white hover:bg-blue-700">
-                  <Link :href="`/cliente/${cliente.id}/edit`">
+                  <Link :href="`/categoria/${categoria.id}/edit`">
                     <Pencil />
                   </Link>
                 </Button>
                 <Button
                   size="sm"
                   class="bg-rose-500 text-white hover:bg-rose-700"
-                  @click="confirmDelete(cliente.id)"
+                  @click="confirmDelete(categoria.id)"
                 >
                   <Trash />
                 </Button>
@@ -120,14 +125,14 @@ const deleteCliente = async()=>{
     <AlertDialog v-model:open="openDialog">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Eliminar cliente?</AlertDialogTitle>
+          <AlertDialogTitle>¿Eliminar categoría?</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta acción no se puede deshacer. El cliente será eliminado permanentemente.
+            Esta acción no se puede deshacer. La categoría será eliminada permanentemente.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction @click="deleteCliente" class="bg-rose-600 text-white hover:bg-rose-700">
+          <AlertDialogAction @click="deleteCategoria" class="bg-rose-600 text-white hover:bg-rose-700">
             Confirmar
           </AlertDialogAction>
         </AlertDialogFooter>

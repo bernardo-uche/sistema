@@ -1,8 +1,10 @@
 <script setup lang="ts">
+// Página de listado de Clientes.
+// Obtiene props desde Laravel vía Inertia (usePage) y muestra la tabla.
 import AppLayout from '@/layouts/AppLayout.vue';
 import AppHeaderLayout from '@/layouts/app/AppHeaderLayout.vue';
 import { Head, usePage, Link, router } from '@inertiajs/vue3';
-import { Cliente, type BreadcrumbItem, type SharedData} from '@/types';
+import { Cliente, type BreadcrumbItem, type AppPageProps } from '@/types';
 import {
   Table,
   TableBody,
@@ -28,10 +30,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
-interface ClientePageProps extends SharedData{
-    cliente: Cliente[];
-}
-
+// Tipamos las props de página usando AppPageProps para incluir ziggy/sidebarOpen/auth.
+type ClientePageProps = AppPageProps<{ cliente: Cliente[] }>;
+// usePage() nos da acceso a las props compartidas por Inertia desde Laravel.
 const {props} = usePage<ClientePageProps>();
 const cliente = computed(()=>props.cliente)
 
@@ -51,6 +52,7 @@ const confirmDelete = (id:number)=>{
 const deleteCliente = async()=>{
   if (!selectedId.value) return;
 
+  // Enviamos DELETE al backend usando Inertia router.
   router.delete(`/cliente/${selectedId.value}`,{
     preserveScroll:true,
     onSuccess:() => {
@@ -70,7 +72,7 @@ const deleteCliente = async()=>{
   <AppLayout :breadcrumbs="breadcrumbs">
 
     <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-      
+      <!-- Botón para crear nuevo cliente (navega con Inertia a /cliente/create) -->
       <div class="flex">
         <Button as-child size="sm" class="bg-indigo-500 text-white hover:bg-indigo-700">
           <Link href="cliente/create">
@@ -79,6 +81,7 @@ const deleteCliente = async()=>{
         </Button>
       </div>
 
+      <!-- Tabla de clientes renderizada con componentes de UI -->
       <div class="relative min-h-[100vh] flex-1 rounded-xl border border-gray-300 dark:border-sidebar-border md:min-h-min">
         <Table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <TableCaption>CLIENTES</TableCaption>
@@ -117,6 +120,7 @@ const deleteCliente = async()=>{
     </div>
 
     <!-- ⚡ Alert Dialog -->
+    <!-- Diálogo de confirmación antes de eliminar; vinculado con openDialog -->
     <AlertDialog v-model:open="openDialog">
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -135,3 +139,4 @@ const deleteCliente = async()=>{
     </AlertDialog>
   </AppLayout>
 </template>
+

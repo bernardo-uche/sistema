@@ -1,8 +1,9 @@
 <script setup lang="ts">
+// Listado de Proveedores con acciones de editar y eliminar usando Inertia.
 import AppLayout from '@/layouts/AppLayout.vue';
 import AppHeaderLayout from '@/layouts/app/AppHeaderLayout.vue';
 import { Head, usePage, Link, router } from '@inertiajs/vue3';
-import {Proveedor, type BreadcrumbItem, type SharedData} from '@/types';
+import {Proveedor, type BreadcrumbItem, type AppPageProps} from '@/types';
 import {
   Table,
   TableBody,
@@ -30,11 +31,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 
-// exportamos el codigo de la interfaces de proveedor ts
-interface ProveedorPageProps extends SharedData{
-  proveedor: Proveedor[];
-}
-
+// Tipado de props de página para incluir ziggy/sidebarOpen/auth y la data propia
+type ProveedorPageProps = AppPageProps<{ proveedor: Proveedor[] }>;
 const {props} = usePage<ProveedorPageProps>();
 const proveedor = computed(()=>props.proveedor)
 

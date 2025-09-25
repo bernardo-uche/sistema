@@ -3,92 +3,165 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Inertia\Inertia;
+use App\Http\Requests\StoreProductoRequest;
+use App\Http\Requests\UpdateProductoRequest;
 use App\Models\Productos;
+use Illuminate\Http\JsonResponse;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 use App\Models\Proveedor;
 use App\Models\Categoria;
 
 class ProductosController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    // Listado con filtros (query string): buscar, activos, bajo_stock, umbral, paginar, por_pagina
+    public function index(Request $request): InertiaResponse
     {
-        //
-        $productos = Productos::with(['categoria', 'proveedor'])->get();
+        $filtros = $request->only(['buscar', 'activos', 'bajo_stock', 'umbral', 'paginar', 'por_pagina']);
+        $data = Productos::listarProductos($filtros);
         return Inertia::render('Productos/Index', [
-            'producto' => $productos,
+            // La vista espera la prop `producto` (singular), ver resources/js/pages/Productos/Index.vue
+            'producto' => $data,
         ]);
-
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // Mostrar formulario de creación
+    public function create(): InertiaResponse
     {
         return Inertia::render('Productos/Create', [
-            'proveedores' => Proveedor::select('id', 'nombre')->get(),
-            'categorias' => Categoria::select('id', 'nombre')->get(),
+            'proveedores' => Proveedor::select('id', 'nombre')->orderBy('nombre')->get(),
+            'categorias'  => Categoria::select('id', 'nombre')->orderBy('nombre')->get(),
         ]);
     }
 
-    public function store(Request $request)
+    // Crear producto (Inertia espera redirect)
+    public function store(StoreProductoRequest $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'stock' => 'required|integer|min:0',
-            'precio_unitario' => 'required|numeric|min:0',
-            'costo_unitario' => 'required|numeric|min:0',
-            'fecha_vencimiento' => 'nullable|date',
-            'proveedor_id' => 'required|exists:proveedors,id',
-            'categoria_id' => 'required|exists:categorias,id',
-            'estado' => 'required|string|in:Activo,Inactivo',
+        try {
+            Productos::crearProducto($request->validated());
+            return redirect()->route('productos.index')
+                             ->with('success', 'Producto creado correctamente');
+        } catch (\Exception $e) {
+            return redirect()->route('productos.index')
+                             ->with('error', $e->getMessage());
+        }
+    }
+
+    // Obtener un producto
+    public function show(int $id): JsonResponse
+    {
+        try {
+            $producto = Productos::obtenerProducto($id);
+            return response()->json([
+                'success' => true,
+                'data' => $producto,
+                'message' => 'Producto obtenido correctamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => $e->getMessage(),
+            ], 404);
+        }
+    }
+
+    // Mostrar formulario de edición
+    public function edit(int $id): InertiaResponse
+    {
+        $producto = Productos::with(['proveedor:id,nombre', 'categoria:id,nombre'])->findOrFail($id);
+        return Inertia::render('Productos/Edit', [
+            'producto'    => $producto,
+            'proveedores' => Proveedor::select('id', 'nombre')->orderBy('nombre')->get(),
+            'categorias'  => Categoria::select('id', 'nombre')->orderBy('nombre')->get(),
         ]);
-
-        Productos::create($validated);
-
-        return redirect()->route('productos.index')
-                         ->with('success', 'Productos creado correctamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // Actualizar (Inertia espera redirect)
+    public function update(UpdateProductoRequest $request, int $id)
     {
-        //
+        try {
+            Productos::actualizarProducto($id, $request->validated());
+            return redirect()->route('productos.index')
+                             ->with('success', 'Producto actualizado correctamente');
+        } catch (\Exception $e) {
+            return redirect()->route('productos.index')
+                             ->with('error', $e->getMessage());
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    // Eliminar con validación de movimientos (se maneja en el modelo)
+    public function destroy(int $id)
     {
-        //
+        try {
+            Productos::eliminarProducto($id);
+            // Inertia espera un redirect después de un DELETE
+            return redirect()->route('productos.index')
+                             ->with('success', 'Producto eliminado correctamente');
+        } catch (\Exception $e) {
+            return redirect()->route('productos.index')
+                             ->with('error', $e->getMessage());
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // Reportes / estadísticas
+    public function reporteInventario(): JsonResponse
     {
-        //
+        try {
+            $reporte = Productos::reporteInventario();
+            return response()->json([
+                'success' => true,
+                'data' => $reporte,
+                'message' => 'Reporte de inventario generado'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function masVendidos(Request $request): JsonResponse
     {
-        //
+        try {
+            $limite = (int) ($request->get('limite', 10));
+            $data = Productos::masVendidos($limite);
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+                'message' => 'Productos más vendidos obtenidos'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
-        $productos = Productos::findOrFail($id);
-        $productos->delete();
-
-        return redirect()->route('productos.index')
-                         ->with('success', 'Cliente eliminado correctamente.');
+    public function estadisticas(): JsonResponse
+    {
+        try {
+            $totales = [
+                'total_productos' => Productos::count(),
+                'activos' => Productos::activos()->count(),
+                'bajo_stock' => Productos::bajoStock()->count(),
+            ];
+            return response()->json([
+                'success' => true,
+                'data' => $totales,
+                'message' => 'Estadísticas de productos obtenidas'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
 

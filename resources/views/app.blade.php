@@ -39,11 +39,16 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
+        {{-- @routes expone las rutas con nombre de Laravel al frontend (Ziggy) para usar route() en Vue --}}
         @routes
+        {{-- @vite carga el entry de Vue + el componente de página actual, resolviendo assets de Vite --}}
         @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
+        {{-- @inertiaHead inyecta etiquetas <head> definidas desde las páginas Vue con <Head> --}}
         @inertiaHead
     </head>
     <body class="font-sans antialiased">
+        {{-- @inertia es el punto de montaje donde Inertia renderiza la página Vue actual --}}
         @inertia
     </body>
 </html>
+

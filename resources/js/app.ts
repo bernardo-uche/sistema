@@ -13,8 +13,12 @@ createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
+        // Creamos la instancia de Vue y montamos la App de Inertia.
+        // "plugin" es el plugin oficial de Inertia para Vue 3 y expone helpers como Head, Link, router, etc.
         createApp({ render: () => h(App, props) })
             .use(plugin)
+            // ZiggyVue permite usar la función global route() en el frontend
+            // para generar URLs basadas en rutas con nombre de Laravel.
             .use(ZiggyVue)
             .mount(el);
     },

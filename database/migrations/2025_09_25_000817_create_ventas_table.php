@@ -6,26 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('compras', function (Blueprint $table) {
+        Schema::create('ventas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('proveedor_id')->nullable()->constrained('proveedor')->onDelete('set null');
+            $table->foreignId('cliente_id')->nullable()->constrained()->onDelete('set null');
             $table->date('fecha');
             $table->decimal('total', 10, 2);
-            $table->string('estado', 10)->default('realizada'); // enum
+            $table->string('estado')->default('completada');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('compras');
+        Schema::dropIfExists('ventas');
     }
 };

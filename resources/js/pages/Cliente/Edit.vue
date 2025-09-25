@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// Página de edición de Cliente.
+// Recibe los datos de "cliente" como props desde Laravel (Inertia::render) y
+// rellena un formulario reactivo que se envía con router.put.
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
@@ -12,7 +15,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Editar', href: '#' },
 ];
 
-// Obtenemos props pasados desde Laravel
+// Obtenemos props pasados desde Laravel a través de Inertia usePage().
 const page: any = usePage();
 const cliente = page.props.cliente;
 
@@ -24,7 +27,7 @@ const form = reactive<{ id?: number; nombre: string; telefono: string; direccion
     direccion: '',
 });
 
-// Cargar datos en el formulario al montar el componente
+// Cargar datos en el formulario al montar el componente.
 onMounted(() => {
     if (cliente) {
         form.id = cliente.id;
@@ -34,7 +37,7 @@ onMounted(() => {
     }
 });
 
-// Enviar actualización
+// Enviar actualización mediante PUT a la ruta resource('cliente') -> cliente.update
 const submit = () => {
     if (!form.id) return;
 

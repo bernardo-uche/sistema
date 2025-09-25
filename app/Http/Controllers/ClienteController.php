@@ -3,100 +3,61 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use App\Models\Cliente;
+use App\Http\Requests\StoreClienteRequest;
+use App\Http\Requests\UpdateClienteRequest;
+use Illuminate\Http\JsonResponse;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
+use Illuminate\Http\RedirectResponse;
 
 class ClienteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    // Lista de clientes: devuelve una página Inertia con los datos necesarios
+    public function index(Request $request): InertiaResponse
     {
-        //
+        $filtros = $request->only(['buscar', 'con_ventas', 'activos', 'paginar', 'por_pagina']);
+        $clientes = Cliente::listarClientes($filtros);
+
         return Inertia::render('Cliente/Index', [
-        'cliente'=> Cliente::all(),
-       ]);
+            'cliente' => $clientes,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // Mostrar formulario de creación (página Inertia)
+    public function create(): InertiaResponse
     {
-        //
         return Inertia::render('Cliente/Create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-     public function store(Request $request)
+    // Crear
+    public function store(StoreClienteRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'telefono' => 'nullable|string|max:20',
-            'direccion' => 'required|string|max:255',
-        ]);
-
-        Cliente::create($validated);
-
-        return redirect()->route('cliente.index')
-                         ->with('success', 'Cliente creado correctamente.');
+        Cliente::crearCliente($request->validated());
+        return redirect()->route('cliente.index');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // Mostrar formulario de edición (página Inertia)
+    public function edit(int $id): InertiaResponse
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-        $cliente = Cliente::findOrFail($id);
+        $cliente = Cliente::obtenerCliente($id);
         return Inertia::render('Cliente/Edit', [
-            'cliente' => $cliente
+            'cliente' => $cliente,
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // Actualizar
+    public function update(UpdateClienteRequest $request, int $id): RedirectResponse
     {
-        //
-
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'telefono' => 'nullable|string|max:20',
-            'direccion' => 'required|string|max:255',
-        ]);
-
-        $cliente = Cliente::findOrFail($id);
-
-        $cliente->update($validated);
-
-        return redirect()->route('cliente.index')
-                        ->with('success', 'Cliente actualizado correctamente.');
+        Cliente::actualizarCliente($id, $request->validated());
+        return redirect()->route('cliente.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    // Eliminar (valida ventas asociadas en el modelo)
+    public function destroy(int $id): RedirectResponse
     {
-        //
-
-        $cliente = Cliente::findOrFail($id);
-        $cliente->delete();
-
-        return redirect()->route('cliente.index')
-                         ->with('success', 'Cliente eliminado correctamente.');
+        Cliente::eliminarCliente($id);
+        return redirect()->route('cliente.index');
     }
 }
+
