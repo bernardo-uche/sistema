@@ -12,11 +12,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash, CirclePlus, MessageCircle } from 'lucide-vue-next'
+import { Pencil, Trash, CirclePlus } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
-
-
-// 🟢 importamos AlertDialog
+//IMPORTAMOS AL ALERTA DINAMICA
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,22 +25,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-// Tipado de props que envía el controlador: 'Compras' puede ser array o paginator
-type ComprasItem = {
+
+// Tipado de props que envía el controlador
+type VentaItem = {
   id: number
-  proveedor?: { id: number; nombre: string } | null
+  cliente?: { id: number; nombre: string } | null
   fecha: string
   total: number
   estado: string
 }
-type ComprasPageProps = AppPageProps<{ Compras: { data?: ComprasItem[] } | ComprasItem[] }>
-const { props } = usePage<ComprasPageProps>()
-const compras = computed<ComprasItem[]>(() => {
-  const c: any = (props as any).Compras
-  return (c && Array.isArray(c.data)) ? c.data : (Array.isArray(c) ? c : [])
+type VentasPageProps = AppPageProps<{ Ventas: { data?: VentaItem[] } | VentaItem[] }>
+const { props } = usePage<VentasPageProps>()
+
+const ventas = computed<VentaItem[]>(() => {
+  const v: any = (props as any).Ventas
+  return (v && Array.isArray(v.data)) ? v.data : (Array.isArray(v) ? v : [])
 })
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Compras', href: '/compras' }]
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Ventas', href: '/ventas' }]
 
 // Diálogo de confirmación para eliminar
 const openDialog = ref(false)
@@ -51,42 +51,42 @@ const confirmDelete = (id: number) => {
   selectedId.value = id
   openDialog.value = true
 }
-const deleteCompra = async () => {
+const deleteVenta = async () => {
   if (!selectedId.value) return
-  router.delete(`/compras/${selectedId.value}`, {
+  router.delete(`/ventas/${selectedId.value}`, {
     preserveScroll: true,
     onSuccess: () => {
-      router.visit('/compras', { replace: true })
+      router.visit('/ventas', { replace: true })
       openDialog.value = false
       selectedId.value = null
     },
     onError: (errors) => {
-      console.error('Error eliminando compra:', errors)
+      console.error('Error eliminando venta:', errors)
     },
   })
 }
 </script>
 
 <template>
-  <Head title="Compras" />
+  <Head title="Ventas" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
 
       <div class="flex gap-x-4">
         <Button as-child size="sm" class="bg-indigo-500 text-white hover:bg-indigo-700">
-          <Link href="compras/create">
-            <CirclePlus /> Registrar Compra
+          <Link href="venta/create">
+            <CirclePlus /> Registrar Venta
           </Link>
         </Button>
       </div>
 
       <div class="relative min-h-[100vh] flex-1 rounded-xl border border-gray-300 dark:border-sidebar-border md:min-h-min">
         <Table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <TableCaption>COMPRAS</TableCaption>
+          <TableCaption>VENTAS</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>Fecha</TableHead>
-              <TableHead>Proveedor</TableHead>
+              <TableHead>Cliente</TableHead>
               <TableHead class="text-right">Total</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead class="text-center">Acciones</TableHead>
@@ -94,21 +94,23 @@ const deleteCompra = async () => {
           </TableHeader>
 
           <TableBody>
-            <TableRow v-for="c in compras" :key="c.id">
-              <TableCell class="font-medium">{{ new Date(c.fecha).toLocaleDateString() }}</TableCell>
-              <TableCell>{{ c.proveedor?.nombre ?? 'Sin proveedor' }}</TableCell>
-              <TableCell class="text-right">{{ new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB' }).format(c.total) }}</TableCell>
-              <TableCell>{{ c.estado }}</TableCell>
+            <TableRow v-for="v in ventas" :key="v.id">
+              <TableCell class="font-medium">{{ new Date(v.fecha).toLocaleDateString() }}</TableCell>
+              <TableCell>{{ v.cliente?.nombre ?? 'Sin cliente' }}</TableCell>
+              <TableCell class="text-right">
+                {{ new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB' }).format(v.total) }}
+              </TableCell>
+              <TableCell>{{ v.estado }}</TableCell>
               <TableCell class="flex justify-center gap-2">
                 <Button as-child size="sm" class="bg-blue-500 text-white hover:bg-blue-700">
-                  <Link :href="`/compras/${c.id}/edit`">
+                  <Link :href="`/ventas/${v.id}/edit`">
                     <Pencil />
                   </Link>
                 </Button>
                 <Button
                   size="sm"
                   class="bg-rose-500 text-white hover:bg-rose-700"
-                  @click="confirmDelete(c.id)"
+                  @click="confirmDelete(v.id)"
                 >
                   <Trash />
                 </Button>
@@ -123,14 +125,14 @@ const deleteCompra = async () => {
     <AlertDialog v-model:open="openDialog" v-if="openDialog">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Eliminar compra?</AlertDialogTitle>
+          <AlertDialogTitle>¿Eliminar venta?</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta acción no se puede deshacer. La compra será eliminada permanentemente.
+            Esta acción no se puede deshacer. La venta será eliminada permanentemente.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction @click="deleteCompra" class="bg-rose-600 text-white hover:bg-rose-700">
+          <AlertDialogAction @click="deleteVenta" class="bg-rose-600 text-white hover:bg-rose-700">
             Confirmar
           </AlertDialogAction>
         </AlertDialogFooter>

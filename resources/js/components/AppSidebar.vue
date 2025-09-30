@@ -7,7 +7,7 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid, User } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-import { Users, BriefcaseConveyorBelt, Store, Truck } from 'lucide-vue-next';
+import { Users, BriefcaseConveyorBelt, Store, Truck, HandCoins  } from 'lucide-vue-next';
 
 const mainNavItems: NavItem[] = [
     {
@@ -36,6 +36,11 @@ const mainNavItems: NavItem[] = [
         title: 'Compras',
         href: '/compras',
         icon: BriefcaseConveyorBelt,
+    },
+    {
+        title: 'Venta',
+        href: '/venta',
+        icon: HandCoins,
     },
 ];
 

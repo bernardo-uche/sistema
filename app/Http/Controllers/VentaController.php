@@ -5,21 +5,25 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Venta;
+use App\Models\Productos;
+use App\Models\Cliente;
 use App\Http\Requests\StoreVentaRequest;
 use App\Http\Requests\UpdateVentaRequest;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
+use Illuminate\Http\RedirectResponse;
 
 class VentaController extends Controller
 {
     // Listado con filtros: buscar, estado, desde, hasta, con_cliente, paginar, por_pagina
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): InertiaResponse|JsonResponse
     {
         try {
             $filtros = $request->only(['buscar', 'estado', 'desde', 'hasta', 'con_cliente', 'paginar', 'por_pagina']);
             $data = Venta::listarVentas($filtros);
-            return response()->json([
-                'success' => true,
-                'data' => $data,
-                'message' => 'Listado de ventas obtenido'
+            return Inertia::render('Venta/Index', [
+                // La vista espera la prop `producto` (singular), ver resources/js/pages/Productos/Index.vue
+                'Ventas' => $data,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -30,16 +34,25 @@ class VentaController extends Controller
         }
     }
 
+     // Página de creación (Inertia)
+    public function create(): InertiaResponse
+{
+    $cliente = Cliente::select('id','nombre')->orderBy('nombre')->get();
+    $productos = Productos::select('id','nombre','precio_unitario')->orderBy('nombre')->get();
+    return Inertia::render('Venta/Create', [
+        'cliente' => $cliente,
+        'productos' => $productos,
+    ]);
+}
+
+
     // Registrar venta con detalles (valida stock y descuenta)
-    public function store(StoreVentaRequest $request): JsonResponse
+    public function store(StoreVentaRequest $request): RedirectResponse
     {
         try {
             $venta = Venta::registrarVenta($request->validated());
-            return response()->json([
-                'success' => true,
-                'data' => $venta,
-                'message' => 'Venta registrada correctamente'
-            ], 201);
+            return redirect()->route('venta.index')
+            ->with('success', 'Compra registrada correctamente');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

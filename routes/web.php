@@ -6,6 +6,7 @@ use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ComprasController;
+use App\Http\Controllers\VentaController;
 use Inertia\Inertia;
 
 // Página pública principal (renderiza el componente Vue 'Welcome.vue').
@@ -54,6 +55,13 @@ Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('compras', ComprasController::class);
 });
+
+//RUTA PARA VENTAS
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('venta', VentaController::class);
+});
+
+
 
 
 
