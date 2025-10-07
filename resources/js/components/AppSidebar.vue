@@ -42,6 +42,12 @@ const mainNavItems: NavItem[] = [
         href: '/venta',
         icon: HandCoins,
     },
+    {
+        title: 'Reportes',
+        href: '/reportes',
+        icon: HandCoins,
+    },
+    
 ];
 
 const footerNavItems: NavItem[] = [

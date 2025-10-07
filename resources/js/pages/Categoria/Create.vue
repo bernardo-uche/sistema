@@ -39,7 +39,7 @@ const submit = async () => {
 <template>
   <Head title="Crear Categoría" />
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="flex flex-1 flex-col gap-4 rounded-xl p-4 max-w-lg">
+    <div class="flex h-full flex-1 flex-col gap-4 -xl p-4 bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-sidebar-border md:min-h-min">
       <h1 class="text-2xl font-bold">Crear Categoría</h1>
 
       <div class="space-y-2">

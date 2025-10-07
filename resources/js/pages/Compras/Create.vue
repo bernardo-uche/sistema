@@ -67,14 +67,14 @@ const submitCompra = () => {
 <template>
   <Head title="Registrar Compra" />
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="flex flex-col gap-4 rounded-xl p-6 border border-gray-300">
+    <div class="flex h-full flex-1 flex-col gap-4 -xl p-4 bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-sidebar-border md:min-h-min">
       <h2 class="text-2xl font-semibold mb-4">Registrar Compra</h2>
 
       <!-- Selección Proveedor -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label for="proveedor_id">Proveedor</Label>
-          <select id="proveedor_id" v-model="proveedorId" class="w-full border rounded p-2">
+          <select id="proveedor_id" v-model="proveedorId" class="w-full border rounded p-2 bg-white dark:bg-gray-800">
             <option disabled value="">Seleccione un proveedor</option>
             <option v-for="prov in props.proveedores" :key="prov.id" :value="prov.id">
               {{ prov.nombre }}
@@ -83,13 +83,13 @@ const submitCompra = () => {
         </div>
         <div>
           <Label for="fecha">Fecha</Label>
-          <Input id="fecha" type="date" v-model="fecha" />
+          <Input class=" bg-white dark:bg-gray-800" id="fecha" type="date" v-model="fecha" />
         </div>
       </div>
 
       <!-- Tabla Detalle -->
       <div class="overflow-x-auto">
-        <table class="w-full border-collapse border border-gray-300">
+        <table class="w-full border-collapse border border-gray-300 bg-white dark:bg-gray-800">
           <thead class="bg-gray-100">
             <tr>
               <th class="border p-2">Producto</th>

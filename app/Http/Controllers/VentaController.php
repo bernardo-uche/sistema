@@ -63,23 +63,14 @@ class VentaController extends Controller
     }
 
     // Obtener venta con detalles
-    public function show(int $id): JsonResponse
-    {
-        try {
-            $venta = Venta::obtenerVenta($id);
-            return response()->json([
-                'success' => true,
-                'data' => $venta,
-                'message' => 'Venta obtenida correctamente'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'data' => null,
-                'message' => $e->getMessage(),
-            ], 404);
-        }
-    }
+public function show(int $id): JsonResponse
+{
+    // Usamos el método estático que ya tienes en el modelo Venta.
+    $venta = Venta::obtenerVenta($id);
+    return response()->json($venta); // Devuelve el objeto Venta directamente.
+}
+
+
 
     // Actualizar venta (reajusta stock)
     public function update(UpdateVentaRequest $request, int $id): JsonResponse

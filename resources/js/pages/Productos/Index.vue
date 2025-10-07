@@ -67,7 +67,7 @@ const deleteProducto = async()=>{
 <template>
   <Head title="Producto" />
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+    <div class="flex h-full flex-1 flex-col gap-4 -xl p-4 bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-sidebar-border md:min-h-min">
 
       <!-- Botón Crear -->
       <div class="flex gap-x-10">

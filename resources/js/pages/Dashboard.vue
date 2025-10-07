@@ -1,55 +1,84 @@
 <script setup lang="ts">
-// Página protegida del Dashboard. Se muestra tras iniciar sesión/verificación.
-// Usa un layout común y breadcrumbs para navegación contextual.
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import PlaceholderPattern from '../components/PlaceholderPattern.vue';
+
+// Importamos iconos de lucide-vue-next
+import {  UsersRound, ShoppingCart, Receipt, Package, AlertTriangle, Clock  } from 'lucide-vue-next';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-    },
+  { title: 'Dashboard', href: '/dashboard' },
 ];
 </script>
 
 <template>
-    <Head title="Dashboard" />
+  <Head title="Dashboard" />
 
-    <AppLayout :breadcrumbs="breadcrumbs">
-        <!-- Contenido de ejemplo del dashboard -->
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
-            <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border flex items-center justify-center text-lg font-semibold">
-                    Cliente
-                </div>
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border flex items-center justify-center text-lg font-semibold">
-                    Compras Ventas
-                </div>
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border flex items-center justify-center text-lg font-semibold">
-                    Productos
-                </div>  
-            </div>
-           <div class="flex flex-col md:flex-row gap-4">
-    <!-- Productos con stock mínimo -->
-    <div class="flex-1 p-4 rounded-lg border border-red-500 bg-red-100 text-red-800 font-semibold">
-        <h2 class="text-lg mb-2">PRODUCTOS CON STOCK MINIMO</h2>
-        <div id="productos-stock-minimo" class="space-y-2">
-            <!-- Aquí se insertarán los productos desde el backend -->
+  <AppLayout :breadcrumbs="breadcrumbs">
+    <div class="min-h-screen bg-gray-100 p-6  dark:bg-gray-800">
+    <!-- Título -->
+    <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">
+      PANEL PRINCIPAL
+    </h1>
+
+    <!-- Grid de tarjetas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      
+      <!-- Clientes -->
+      <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition cursor-pointer flex items-center gap-4">
+        <UsersRound class="w-12 h-12 text-blue-600" />
+        <div>
+          <h2 class="text-xl font-semibold text-gray-800">Clientes</h2>
+          <p class="text-gray-500 text-sm">Gestión de clientes registrados</p>
         </div>
+      </div>
+
+      <!-- Compras -->
+      <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition cursor-pointer flex items-center gap-4">
+        <ShoppingCart class="w-12 h-12 text-green-600" />
+        <div>
+          <h2 class="text-xl font-semibold text-gray-800">Compras</h2>
+          <p class="text-gray-500 text-sm">Control de compras a proveedores</p>
+        </div>
+      </div>
+
+      <!-- Ventas -->
+      <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition cursor-pointer flex items-center gap-4">
+        <Receipt class="w-12 h-12 text-purple-600" />
+        <div>
+          <h2 class="text-xl font-semibold text-gray-800">Ventas</h2>
+          <p class="text-gray-500 text-sm">Gestión de ventas diarias</p>
+        </div>
+      </div>
+
+      <!-- Productos -->
+      <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition cursor-pointer flex items-center gap-4">
+        <Package class="w-12 h-12 text-orange-600" />
+        <div>
+          <h2 class="text-xl font-semibold text-gray-800">Productos</h2>
+          <p class="text-gray-500 text-sm">Administración del catálogo</p>
+        </div>
+      </div>
+
+      <!-- Stock Mínimo -->
+      <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition cursor-pointer flex items-center gap-4">
+        <AlertTriangle class="w-12 h-12 text-red-600" />
+        <div>
+          <h2 class="text-xl font-semibold text-gray-800">Stock Mínimo</h2>
+          <p class="text-gray-500 text-sm">Productos con bajo inventario</p>
+        </div>
+      </div>
+
+      <!-- Stock Próximos a Vencer -->
+      <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition cursor-pointer flex items-center gap-4">
+        <Clock class="w-12 h-12 text-yellow-600" />
+        <div>
+          <h2 class="text-xl font-semibold text-gray-800">Stock a Vencer</h2>
+          <p class="text-gray-500 text-sm">Productos Proximos a Vencer</p>
+        </div>
+      </div>
+
     </div>
-
-    <!-- Productos más vendidos -->
-    <div class="flex-1 p-4 rounded-lg border border-yellow-500 bg-yellow-100 text-yellow-800 font-semibold">
-        <h2 class="text-lg mb-2">PRODUCTOS PROXIMOS A VENCER</h2>
-        <div id="productos-mas-vendidos" class="space-y-2">
-            <!-- Aquí se insertarán los productos desde el backend -->
-        </div>
-    </div>
-</div>
-
-        </div>
-    </AppLayout>
+  </div>
+  </AppLayout>
 </template>
-

@@ -13,7 +13,7 @@ defineProps<Props>();
 </script>
 
 <template>
-    <svg xmlns="https://cdn.vectorstock.com/i/750p/62/25/dental-care-icon-tooth-symbol-vector-24016225.avif" viewBox="0 0 40 42" :class="className" v-bind="$attrs">
+    <svg xmlns="https://images.squarespace-cdn.com/content/v1/5b91733c9772ae9bb38e47c0/ae84e082-2a6c-4645-87b0-43ab29f149e1/curiosidadesdentales" viewBox="0 0 40 42" :class="className" v-bind="$attrs">
         <path
             fill="currentColor"
             fill-rule="evenodd"
