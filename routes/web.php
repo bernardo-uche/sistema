@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ComprasController;
 use App\Http\Controllers\VentaController;
+use App\Http\Controllers\ReporteController;
 use Inertia\Inertia;
 
 // Página pública principal (renderiza el componente Vue 'Welcome.vue').
@@ -61,6 +62,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('venta', VentaController::class);
 });
 
+// RUTAS PARA EL MÓDULO DE REPORTES
+Route::middleware(['auth', 'verified'])->prefix('reportes')->name('reportes.')->group(function () {
+    // --- Páginas (UI) ---
+    // Dashboard de Reportes
+    Route::get('/', [ReporteController::class, 'index'])->name('index');
+    // Página de Reporte de Ventas
+    Route::get('/ventas', [ReporteController::class, 'reporteVentasPage'])->name('ventas.page');
+    // Página de Reporte de Stock Mínimo
+    Route::get('/stock-minimo', [ReporteController::class, 'reporteStockMinimoPage'])->name('stock_minimo.page');
+
+    // --- Endpoints de Datos (API-like) ---
+    // Datos para el dashboard (KPIs)
+    Route::get('/data/kpis', [ReporteController::class, 'kpisGenerales'])->name('data.kpis');
+    // Datos para el reporte de ventas (filtrado)
+    Route::post('/data/ventas', [ReporteController::class, 'reporteVentasData'])->name('data.ventas');
+    // Datos para el reporte de stock mínimo
+    Route::get('/data/stock-minimo', [ReporteController::class, 'reporteStockMinimoData'])->name('data.stock_minimo');
+});
 
 
 
@@ -69,4 +88,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // Rutas adicionales separadas (auth: login/register/etc. y ajustes de usuario)
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
-

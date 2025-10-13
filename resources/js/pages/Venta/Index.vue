@@ -85,6 +85,50 @@ const formatCurrency = (value: number) => new Intl.NumberFormat('es-BO', {
   currency: 'BOB',
 }).format(value)
 
+// Formatea una fecha recibida desde la base de datos sin que el parseo de ISO
+// mueva el día por diferencias de zona horaria. Acepta 'YYYY-MM-DD' o
+// 'YYYY-MM-DD HH:mm:ss' u objetos Date.
+const formatDate = (input: string | Date | null | undefined) => {
+  if (!input) return ''
+  // Si ya es Date, formateamos respetando la zona de Bolivia
+  if (input instanceof Date) {
+    return new Intl.DateTimeFormat('es-BO', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'America/La_Paz',
+    }).format(input)
+  }
+
+  const str = String(input)
+  // Extrae YYYY-MM-DD del principio
+  const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (m) {
+    const y = Number(m[1])
+    const mo = Number(m[2]) - 1
+    const d = Number(m[3])
+    // Construimos una hora segura (mediodía UTC) para evitar que el cambio de
+    // zona horaria ajuste el día al formatear en 'America/La_Paz'.
+    const safeUtc = new Date(Date.UTC(y, mo, d, 12, 0, 0))
+    return new Intl.DateTimeFormat('es-BO', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'America/La_Paz',
+    }).format(safeUtc)
+  }
+
+  // Fallback: intenta parseo normal y formatea en la zona de Bolivia
+  const parsed = new Date(str)
+  if (isNaN(parsed.getTime())) return str
+  return new Intl.DateTimeFormat('es-BO', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: 'America/La_Paz',
+  }).format(parsed)
+}
+
 const verDetalle = async (id: number) => {
   openDetalle.value = true
   cargando.value = true
@@ -132,7 +176,7 @@ const verDetalle = async (id: number) => {
 
           <TableBody>
             <TableRow v-for="v in ventas" :key="v.id">
-              <TableCell class="font-medium">{{ new Date(v.fecha).toLocaleDateString() }}</TableCell>
+              <TableCell class="font-medium">{{ formatDate(v.fecha) }}</TableCell>
               <TableCell>{{ v.cliente?.nombre ?? 'Sin cliente' }}</TableCell>
               <TableCell class="text-right">
                 {{
@@ -188,8 +232,8 @@ const verDetalle = async (id: number) => {
     <AlertDialog v-model:open="openDetalle" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
   <AlertDialogContent class="bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-2xl w-full p-6 sm:p-8">
     <AlertDialogHeader class="mb-4 border-b border-gray-200 dark:border-gray-700 pb-3">
-      <AlertDialogTitle class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-        Detalle de Venta
+      <AlertDialogTitle class="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center">
+        Detalle Venta
       </AlertDialogTitle>
       <AlertDialogDescription class="mt-1 text-gray-600 dark:text-gray-400 text-sm">
         <div v-if="cargando" class="text-center py-8 text-indigo-600 font-semibold animate-pulse">
@@ -197,7 +241,7 @@ const verDetalle = async (id: number) => {
         </div>
         <div v-else-if="ventaSeleccionada" class="space-y-4 text-gray-800 dark:text-gray-200">
           <p><span class="font-semibold">Cliente:</span> {{ ventaSeleccionada.cliente?.nombre ?? 'N/A' }}</p>
-          <p><span class="font-semibold">Fecha:</span> {{ new Date(ventaSeleccionada.fecha).toLocaleDateString() }}</p>
+          <p><span class="font-semibold">Fecha:</span> {{ formatDate(ventaSeleccionada.fecha) }}</p>
           <p><span class="font-semibold">Estado:</span> 
             <span
               :class="{

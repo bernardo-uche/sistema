@@ -62,23 +62,12 @@ class ComprasController extends Controller
     }
 
     // Obtener compra con detalles
-    public function show(int $id): JsonResponse
-    {
-        try {
-            $compra = Compras::obtenerCompra($id);
-            return response()->json([
-                'success' => true,
-                'data' => $compra,
-                'message' => 'Compra obtenida correctamente'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'data' => null,
-                'message' => $e->getMessage(),
-            ], 404);
-        }
-    }
+    public function show($id): JsonResponse
+{
+    $compra = Compras::obtenerCompra($id);
+    return response()->json($compra); // Devuelve el objeto Compra directamente.
+}
+
 
     // Actualizar compra (reajusta stock)
     public function update(UpdateCompraRequest $request, int $id): JsonResponse
